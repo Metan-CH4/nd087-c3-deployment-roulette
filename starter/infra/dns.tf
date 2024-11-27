@@ -40,14 +40,6 @@ resource "aws_route53_record" "blue" {
 #   records        = [kubernetes_service.green.status.0.load_balancer.0.ingress.0.hostname] # https://github.com/hashicorp/terraform-provider-kubernetes/pull/1125
 # }
 
-resource "aws_route53_zone" "private_dns" {
-  name    = "udacityproject"
-  comment = "DNS for Udacity Projects"
-
-  vpc {
-    vpc_id = module.vpc.vpc_id
-  }
-}
 
 
 resource "aws_route53_zone" "private_dns" {
