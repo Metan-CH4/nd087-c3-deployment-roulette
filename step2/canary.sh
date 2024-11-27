@@ -7,7 +7,7 @@ function manual_verification {
 
     if [[ $answer =~ ^[Yy]$ ]] ;
     then
-        echo "continuing deployment"
+        echo "Continuing deployment"
     else
         exit
     fi
@@ -33,14 +33,25 @@ function canary_deploy {
 }
 
 # Initialize canary-v2 deployment
+kubectl apply -f ../starter/apps/canary/canary-svc.yml
+kubectl apply -f ../starter/apps/canary/index_v2_html.yml
 kubectl apply -f ../starter/apps/canary/canary-v2.yml
+
+CANARY_SVC_IP=$(kubectl get svc canary-svc -n udacity -o jsonpath='{.spec.clusterIP}')
+HELLO_WORLD_POD=$(kubectl get pod -n udacity -o jsonpath='{.items[?(@.metadata.labels.app=="hello-world")].metadata.name}')
 
 sleep 1
 # Begin canary deployment
-while [ $(kubectl get pods -n udacity | grep -c canary-v1) -gt 0 ]
+while [ $(kubectl get pods -n udacity | grep -c canary-v1) -gt $(kubectl get pods -n udacity | grep -c canary-v2) ]
 do
   canary_deploy
   manual_verification
 done
+
+for i in `seq 1 10`; do
+  kubectl exec -it $HELLO_WORLD_POD -n udacity -- curl http://$CANARY_SVC_IP:80 >> canary.txt
+done
+
+kubectl get pods --all-namespaces >> canary2.txt
 
 echo "Canary deployment of v2 successful"
