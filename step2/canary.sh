@@ -1,4 +1,5 @@
 #!/bin/bash
+
 DEPLOY_INCREMENTS=1
 
 function manual_verification {
