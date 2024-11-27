@@ -19,8 +19,8 @@ function canary_deploy {
   NUM_OF_V2_PODS=$(kubectl get pods -n udacity | grep -c canary-v2)
   echo "V2 PODS: $NUM_OF_V2_PODS"
 
-  kubectl scale deployment canary-v2 --replicas=$((NUM_OF_V2_PODS + $DEPLOY_INCREMENTS))
-  kubectl scale deployment canary-v1 --replicas=$((NUM_OF_V1_PODS - $DEPLOY_INCREMENTS))
+  kubectl scale deployment canary-v2 --replicas=$((NUM_OF_V2_PODS + $DEPLOY_INCREMENTS)) -n udacity
+  kubectl scale deployment canary-v1 --replicas=$((NUM_OF_V1_PODS - $DEPLOY_INCREMENTS)) -n udacity
   # Check deployment rollout status every 1 second until complete.
   ATTEMPTS=0
   ROLLOUT_STATUS_CMD="kubectl rollout status deployment/canary-v2 -n udacity"
@@ -33,9 +33,9 @@ function canary_deploy {
 }
 
 # Initialize canary-v2 deployment
-kubectl apply -f ../starter/apps/canary/canary-svc.yml
-kubectl apply -f ../starter/apps/canary/index_v2_html.yml
-kubectl apply -f ../starter/apps/canary/canary-v2.yml
+kubectl apply -f ../starter/apps/canary/canary-svc.yml -n udacity
+kubectl apply -f ../starter/apps/canary/index_v2_html.yml -n udacity
+kubectl apply -f ../starter/apps/canary/canary-v2.yml -n udacity
 
 CANARY_SVC_IP=$(kubectl get svc canary-svc -n udacity -o jsonpath='{.spec.clusterIP}')
 HELLO_WORLD_POD=$(kubectl get pod -n udacity -o jsonpath='{.items[?(@.metadata.labels.app=="hello-world")].metadata.name}')
